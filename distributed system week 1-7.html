@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Distributed Systems - Week 1-7 Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            padding: 24px;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .score {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin: 0 0 16px;
+            font-size: 1.8rem;
+        }
+        .question {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .instruction {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 16px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            border: 1px solid #ddd;
+            min-height: 48px;
+        }
+        .option input {
+            margin-right: 12px;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+        }
+        .option label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1.3;
+        }
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        .submit-btn, .next-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+            max-width: 200px;
+            touch-action: manipulation;
+        }
+        .submit-btn:hover, .next-btn:hover {
+            background-color: #0056b3;
+        }
+        .submit-btn:disabled, .next-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 16px;
+            font-size: 1rem;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            .quiz-container { padding: 16px; border-radius: 8px; }
+            .score { top: 8px; right: 8px; padding: 6px 12px; font-size: 0.8rem; }
+            h1 { font-size: 1.5rem; }
+            .question { font-size: 1rem; }
+            .instruction { font-size: 0.85rem; }
+            .option { padding: 10px; min-height: 44px; }
+            .option input { width: 18px; height: 18px; }
+            .option label { font-size: 0.9rem; }
+            .submit-btn, .next-btn { padding: 10px; font-size: 0.9rem; max-width: 100%; }
+        }
+        @media (min-width: 601px) and (max-width: 900px) {
+            .quiz-container { padding: 20px; }
+            h1 { font-size: 1.7rem; }
+            .question { font-size: 1.05rem; }
+            .instruction { font-size: 0.9rem; }
+            .option { padding: 11px; }
+            .option label { font-size: 0.95rem; }
+            .submit-btn, .next-btn { padding: 11px 20px; font-size: 0.95rem; }
+        }
+        @media (min-width: 901px) {
+            .quiz-container { padding: 24px; }
+            h1 { font-size: 1.8rem; }
+            .question { font-size: 1.1rem; }
+            .instruction { font-size: 0.95rem; }
+            .option { padding: 12px; }
+            .option label { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="score">Score: <span id="score">0</span>/70</div>
+        <h1>Distributed Systems — Week 1-7 Quiz</h1>
+        <div class="question" id="question"></div>
+        <div class="instruction" id="instruction"></div>
+        <div class="options" id="options"></div>
+        <button class="submit-btn" id="submit" disabled>Submit</button>
+        <button class="next-btn" id="next" style="display: none;">Next</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Questions array (70 questions) — options and answers reflect your provided content
+        const questions = [
+            {
+                question: "Which of the following clocks are designed to represent virtual time in distributed systems?",
+                options: ["Lamport clocks", "Vector clocks", "Matrix clocks", "All of the above"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "Consider the figure below, which shows three processes (P1, P2, P3) with events a, b, c, d, e, f and messages communicating between them. Assume that initial logical clock values are all initialized to 0. Assign Lamport timestamps to the event d ____, f____",
+                options: ["6, 7", "7, 9", "5, 6", "5, 5"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "If the Lamport clock of event e1 is less than the Lamport clock of event e2, then there must be a chain of causal events by which e1 precedes e2",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Which of the following best describes \"Transparency\" in Distributed Systems?",
+                options: ["Hiding the complexity of the system from users and applications", "Using only transparent hardware components", "Making all system operations visible to end-users", "Avoiding the use of encryption for better performance"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "Three computers, A, B, and C, communicate using a protocol that implements Lamport logical clocks (including their clock time stamp in messages). All three computers begin with their logical clock set to zero at the beginning of time. Later, the following sequence of events occurs: (see prompt). After all of these messages have been sent and received what time does computer A think it is?",
+                options: ["10", "12", "15", "20"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "In a distributed system, why is leader election important?",
+                options: ["To improve system performance.", "To simplify network topology.", "To avoid conflicts and manage coordination.", "To reduce the number of active nodes."],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "In ___________, a channel acts like a set in which the sender process adds messages and the receiver process removes messages from it in a random order.",
+                options: ["non-FIFO model", "FIFO model"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "What is the primary purpose of middleware in a distributed system?",
+                options: ["Providing user-facing applications", "Managing physical machines", "Offering common services like communication and resource management", "Executing operating system functions"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "Which Leader Election algorithm is best suited for a ring topology network?",
+                options: ["Bully Algorithm", "Paxos Algorithm", "Ring Algorithm", "Flooding Algorithm"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "Which of the following best describes the term \"scalability\" in a distributed system?",
+                options: ["The ability to recover from failures.", "The ability to grow and manage increased demand.", "The ability to ensure data consistency.", "The ability to handle multiple tasks simultaneously."],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "At 12:25:440 (hr, min, 1/100 sec.), server B requests time from the time-server A. At 12:25:710, server B receives a reply from timeserver A with the timestamp of 12:25:275. Find out the drift of B’s clock with respect to the time-server A's clock (assume there is no processing time at the time-server).",
+                options: ["-1.5 sec.", "2 sec.", "-3 sec.", "3 sec."],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "In a distributed system snapshot algorithm, what is used to distinguish messages that should be included in the snapshot from those that should not?",
+                options: ["A control message", "A process identifier", "A marker", "A timestamp"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "What is the primary advantage of a vector clock over Lamport's logical clock in distributed systems?",
+                options: ["Lower memory usage", "Detection of causal relationships", "Faster computation", "Automatic total ordering"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "True/False? The Chandy-Lamport algorithm can be initiated by any process by executing the Marker sending rule, by which it records its local state and sends a marker on each outgoing channel.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "The global state of a distributed system is a collection of the local states of the processes and the channels.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "The Network Time Protocol (NTP) is used for:",
+                options: ["Synchronizing logical clocks", "Synchronizing physical clocks over a network", "Measuring message delays", "Calculating vector clocks"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "In the Chandy-Lamport snapshot algorithm, what does each process record during snapshot collection?",
+                options: ["Message contents", "Message delivery timestamps", "Local state and incoming messages", "Outgoing message queues"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "What is the primary goal of quorum-based mutual exclusion in distributed systems?",
+                options: ["To ensure all processes execute critical sections simultaneously", "To minimize the number of messages required for mutual exclusion", "To allow only a subset (quorum) of processes to grant access to the critical section", "To eliminate the need for any communication between processes"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "How many messages are required among 10 processes during a single critical section execution in Lamport's algorithm?",
+                options: ["18 messages", "27 messages", "36 messages", "45 messages"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "True/False? Chandy-Lamport algorithm of global snapshot recording uses the FIFO (First-In, First-Out) kind of channel",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "In transaction processing systems, ____________ phenomenon occurs when a cascading rollback forces the system to revert excessively far back in the computation - potentially even to the beginning - despite the presence of checkpoints?",
+                options: ["Phantom Effect", "Domino Effect", "Simple Rollback", "Livelock"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Which problem do consensus algorithms fundamentally solve in distributed systems?",
+                options: ["Clock synchronization between nodes", "Achieving agreement on a value/decision despite failures", "Load balancing across server nodes", "Failure detection and recovery"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "True/False? In the context of rollback recovery, Cascading failures caused by one node crashing is not represented by the \"domino effect\"?",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Which property is NOT required by the Consensus Problem?",
+                options: ["Agreement on a single value", "Termination within bounded time", "Validity if all non-faulty processes propose the same value", "Tolerance to Byzantine (arbitrary) failures"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "Which property ensures that all non-faulty nodes in a distributed system eventually agree on the same value?",
+                options: ["Availability", "Partition tolerance", "Termination", "Agreement"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "What is the primary goal of checkpointing in distributed systems?",
+                options: ["To synchronize clocks across all nodes", "To ensure data consistency", "To minimize network latency", "To recover from failures efficiently"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "Which rollback recovery scheme periodically saves the system state to stable storage?",
+                options: ["Checkpoint-based recovery schemes", "Log-based recovery schemes", "Hybrid recovery schemes", "Real-time recovery schemes"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "True/False? In the context of the HOLDER variable in distributed mutual exclusion, each node maintains the identity of the node that currently holds the privilege or leads to it.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "Which metric is used to evaluate the performance of rollback recovery schemes?",
+                options: ["Disk space utilization", "Message delivery latency", "Recovery time", "Network bandwidth"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "True/False? Raymond's algorithm, the token is not passed along the edges of a logical tree.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "What is the primary challenge in implementing Distributed Shared Memory (DSM) systems?",
+                options: ["Achieving high-quality graphical rendering across nodes", "Maintaining memory consistency among distributed processes", "Synchronizing real-time audio processing", "Designing a responsive user interface"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "In distributed systems, a minimum spanning tree (MST) is often constructed to optimize network communication. One of its key applications is to efficiently support which of the following communication patterns?",
+                options: ["Unicasting", "Anycasting", "Multicasting", "Broadcasting"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "In Distributed Shared Memory (DSM) systems, which consistency model ensures that all processes see memory operations (reads/writes) to the same memory location in the same order, but not necessarily in real-time order?",
+                options: ["Sequential Consistency", "Causal Consistency", "Eventual Consistency", "Weak Consistency"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "What challenges make it difficult to directly apply Prim's and Kruskal's algorithms for finding a Minimum Spanning Tree (MST) in the message-passing model?",
+                options: ["They are computationally complex.", "They require knowing the state of the whole graph.", "They involve multiple processes running in parallel.", "They rely on global synchronization."],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Which issue is critical in the implementation of Distributed Shared Memory (DSM)?",
+                options: ["Graphical rendering", "Consistency maintenance", "Audio processing", "User interface design"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Consider the following properties of a minimum spanning tree (MST): MST Property 1: Given a fragment of an MST, let e be a minimum-weight outgoing edge of the fragment. Then, joining e and its adjacent non-fragment node to the fragment yields another fragment of an MST. MST Property 2: If all the edges of a connected graph have the same weights, then the MST is unique. Which is true?",
+                options: ["Both properties are true", "Both properties are false", "Only property 1 is true", "Only property 2 is true"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "What is the main challenge in detecting deadlocks in distributed systems?",
+                options: ["Lack of resources.", "Synchronized clocks.", "Lack of a global state.", "Excessive memory usage."],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "Which graph structure is used for detecting deadlocks in distributed systems?",
+                options: ["Spanning Tree", "Wait-for Graph (WFG)", "Directed Acyclic Graph (DAG)", "Flowchart"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "A cycle in a Wait-for Graph (WFG) indicates the presence of a deadlock in a distributed system.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "Deadlock detection and recovery is the most suitable strategy for systems with high availability requirements.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "True/False? In Dijkstra’s self-stabilizing token ring system, the self-correcting mechanism ensures the system eventually recovers from arbitrary transient faults without external intervention.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "What is the primary objective of Dijkstra's self-stabilizing token ring algorithm in distributed systems?",
+                options: ["Achieving mutual exclusion among processes", "Synchronizing clocks in a distributed network", "Preventing message loss in communication channels", "Ensuring fair access to shared resources"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "What is message ordering in distributed systems primarily concerned with?",
+                options: ["Ensuring messages arrive in a specific sequence", "Minimizing network latency", "Encrypting messages for secure transmission", "Balancing load among distributed nodes"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "What is the main challenge in achieving total order multicast?",
+                options: ["Ensuring message delivery to all group members", "Guaranteeing message integrity", "Synchronizing clocks across all processes", "Ordering messages consistently across all recipients"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "True/False? In termination detection algorithms, a distributed snapshot refers to a consistent global state of the distributed system, capturing the states of all processes and channels at a logical point in time.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "What does the term \"virtual synchrony\" refer to in group communication?",
+                options: ["Synchronization of physical clocks", "Consistent group view and message order despite changes in group membership", "Random message broadcasting", "Synchronous execution of all group members"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "True/False? Dijkstra's self-stabilizing token ring system was not designed primarily to solve the problem of achieving mutual exclusion among processes in a distributed system.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Which message ordering guarantee ensures that messages from the same sender are delivered to all receivers in the exact order they were sent?",
+                options: ["Total Ordering", "Causal Ordering", "Partial Ordering", "FIFO Ordering"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "Which of the following makes termination detection in distributed systems easier?",
+                options: ["A single centralized coordinator", "Synchronous communication with fixed delays", "Processes that never fail", "All of the above"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "True or False? In a total order multicast, the delivery order of messages must match the exact physical time at which they were sent.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "What does \"churn\" specifically refer to in Peer-to-Peer (P2P) networks?",
+                options: ["The process of breaking files into smaller pieces for distribution", "The persistent volatility caused by nodes joining/leaving and objects being added/removed", "The encryption method used to secure data transfers", "The protocol for super node election in hybrid P2P systems"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "What is the key characteristic of file segmentation in Google File System (GFS)?",
+                options: ["Files are split into chunks of both fixed and variable sizes", "Files are divided into fixed-size chunks (default 64MB)", "Files are partitioned into variable-sized chunks based on content", "Files are stored as single contiguous blocks without segmentation"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "What is the defining characteristic of a Peer-to-Peer (P2P) network?",
+                options: ["Centralized control by a single server", "Equal peer nodes acting as both clients and servers", "Hierarchical organization with super nodes", "Dependence on physical proximity for communication"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Consider the following statement: Statement 1: Gnutella is an example of an Unstructured peer-to-peer (P2P) overlay network. Statement 2: Five is the default replication factor for chunks in Google File System (GFS). Which is correct?",
+                options: ["Statement 1 is true, statement 2 is false", "Statement 1 is true, statement 2 is true", "Statement 1 is false, statement 2 is false", "Statement 1 is false, statement 2 is false"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "In GFS (Google File System), regular handshakes between Master and chunk servers helps in identifying failed chunk servers and detects data corruption by ________________.",
+                options: ["Monitoring", "Replication", "Checksumming", "Data Mutation"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "Which type of indexing involves indexes distributed across peers and uses mechanisms like Distributed Hash Tables (DHT) for accessing data?",
+                options: ["Centralized indexing", "Semantic indexing", "Local indexing", "Distributed indexing"],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "Which of the following statements accurately describes the principles of chunk replica placement in a distributed storage system?",
+                options: ["The creation of chunks is prioritized on heavily utilized chunk servers to optimize data availability.", "Re-replication is performed regularly to maintain the number of replicas above a certain threshold.", "Chunk data is directly copied from a master server to initiate the re-replication process.", "Rebalancing involves periodic adjustments of replica distribution to enhance disk space and load balancing."],
+                answer: ["D"],
+                type: "single"
+            },
+            {
+                question: "What role does an overlay network play in a P2P system?",
+                options: ["Routing data between peers", "Managing user authentication", "Encrypting communication channels", "Distributing software updates"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "True/False? A common application of synchronous one-shot distributed algorithms is leader election.",
+                options: ["True", "False"],
+                answer: ["A"],
+                type: "single"
+            },
+            {
+                question: "Which of the following statements accurately describes a common approach to designing a randomized leader election algorithm?",
+                options: ["Processors use fixed, pre-assigned identifiers and run a deterministic algorithm to elect a leader.", "Processors synchronize their clocks first and then execute a deterministic election algorithm based on timing.", "Processors choose random pseudo-identifiers from a range and then execute a deterministic leader election algorithm.", "Processors broadcast their physical addresses and elect the leader with the lowest MAC address."],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "The typical data structure used for the output of the Map function in MapReduce is not key-value pairs.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "In the MapReduce paradigm, what is the essential responsibility of the Map function?",
+                options: ["Dividing raw input data into fixed-size blocks for HDFS storage", "Converting input records (key-value pairs) into a new set of intermediate key-value pairs", "Merging and sorting all intermediate values by their keys", "Coordinating task execution across cluster nodes"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "In MapReduce, which optional phase runs locally on mapper nodes to reduce network traffic by performing intermediate aggregation of key-value pairs before the shuffle phase?",
+                options: ["Partition", "Combine", "Sort", "Spill"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "What is a virtual backbone in wireless sensor networks?",
+                options: ["A physical network infrastructure", "A centralized routing server", "A subset of nodes that form a connected and efficient communication structure.", "A database for storing sensor data"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "Which component of HDFS is responsible for storing actual data blocks across the cluster?",
+                options: ["NameNode", "DataNode", "ResourceManager", "JobTracker"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "True/False? The ResourceManager and JobTracker are components of HDFS responsible for storing actual data blocks across the cluster.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "The primary abstraction in Apache Spark for processing large datasets is the Table.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "Which of the following statements about fault tolerance in the context of MapReduce is correct?",
+                options: ["MapReduce does not handle machine failures as it focuses on small-scale data processing", "MapReduce resumes all tasks from scratch when a worker fails, causing significant delays.", "In the case of a Map worker failure, both completed and in-progress map tasks are reset to idle", "When a reduce worker fails, all tasks—completed or not—are reset to idle"],
+                answer: ["C"],
+                type: "single"
+            },
+            {
+                question: "True/False? Reactive routing protocols ask each host (or many hosts) to maintain global topology information, thus a route can be provided immediately when requested.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            },
+            {
+                question: "True/False? The Internet of Things (IoT) is not a common application of sensor networks.",
+                options: ["True", "False"],
+                answer: ["B"],
+                type: "single"
+            }
+        ];
+
+        // Fisher-Yates shuffle algorithm
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Shuffle questions and their options and adjust answer indices
+        const shuffledQuestions = shuffle([...questions]).map(q => {
+            const originalOptions = [...q.options];
+            const shuffledOptions = shuffle([...q.options]);
+            const newAnswer = q.answer.map(letter => {
+                const originalIndex = letter.charCodeAt(0) - 65;
+                const newIndex = shuffledOptions.indexOf(originalOptions[originalIndex]);
+                return String.fromCharCode(65 + newIndex);
+            });
+            return {
+                ...q,
+                options: shuffledOptions,
+                answer: newAnswer
+            };
+        });
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOptions = [];
+        let answered = false;
+
+        const questionEl = document.getElementById('question');
+        const instructionEl = document.getElementById('instruction');
+        const optionsEl = document.getElementById('options');
+        const submitBtn = document.getElementById('submit');
+        const nextBtn = document.getElementById('next');
+        const scoreEl = document.getElementById('score');
+        const resultEl = document.getElementById('result');
+
+        function loadQuestion() {
+            const q = shuffledQuestions[currentQuestion];
+            questionEl.textContent = `Q${currentQuestion + 1}: ${q.question}`;
+            instructionEl.textContent = q.type === 'multiple' ? `Select ${q.answer.length} correct answers` : 'Select one correct answer';
+            optionsEl.innerHTML = '';
+            selectedOptions = [];
+            answered = false;
+            submitBtn.disabled = true;
+            submitBtn.style.display = 'block';
+            nextBtn.style.display = 'none';
+            resultEl.textContent = '';
+
+            q.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.classList.add('option');
+
+                const input = document.createElement('input');
+                input.type = q.type === 'single' ? 'radio' : 'checkbox';
+                input.name = q.type === 'single' ? 'option' : `option${index}`;
+                input.id = `option${index}`;
+                input.dataset.index = index;
+                input.addEventListener('change', () => selectOption(index));
+
+                const label = document.createElement('label');
+                label.htmlFor = `option${index}`;
+                label.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+
+                div.appendChild(input);
+                div.appendChild(label);
+                optionsEl.appendChild(div);
+            });
+
+            // Scroll to the top of the quiz container
+            document.querySelector('.quiz-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+
+            const q = shuffledQuestions[currentQuestion];
+            const option = String.fromCharCode(65 + index);
+
+            if (q.type === 'single') {
+                selectedOptions = [option];
+            } else {
+                if (selectedOptions.includes(option)) {
+                    selectedOptions = selectedOptions.filter(opt => opt !== option);
+                } else {
+                    selectedOptions.push(option);
+                }
+            }
+            submitBtn.disabled = selectedOptions.length === 0;
+        }
+
+        function checkAnswer() {
+            const q = shuffledQuestions[currentQuestion];
+            const correct = q.answer.slice(); // copy
+            let isCorrect;
+
+            if (q.type === 'single') {
+                isCorrect = selectedOptions[0] === correct[0];
+            } else {
+                selectedOptions.sort();
+                correct.sort();
+                isCorrect = selectedOptions.length === correct.length && selectedOptions.every((val, idx) => val === correct[idx]);
+            }
+
+            optionsEl.querySelectorAll('.option').forEach(opt => {
+                const index = opt.querySelector('input').dataset.index;
+                const option = String.fromCharCode(65 + parseInt(index));
+                if (correct.includes(option)) {
+                    opt.classList.add('correct');
+                } else if (selectedOptions.includes(option)) {
+                    opt.classList.add('incorrect');
+                }
+                opt.querySelector('input').disabled = true;
+            });
+
+            if (isCorrect) {
+                score++;
+                scoreEl.textContent = score;
+                resultEl.textContent = 'Correct!';
+                resultEl.style.color = '#28a745';
+            } else {
+                resultEl.textContent = `Incorrect. Correct answer: ${correct.join(', ')}`;
+                resultEl.style.color = '#dc3545';
+            }
+
+            submitBtn.style.display = 'none';
+            nextBtn.style.display = 'block';
+            answered = true;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < shuffledQuestions.length) {
+                loadQuestion();
+            } else {
+                questionEl.textContent = 'Quiz Completed!';
+                instructionEl.textContent = '';
+                optionsEl.innerHTML = '';
+                submitBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                resultEl.textContent = `Final Score: ${score}/70`;
+                resultEl.style.color = '#007bff';
+            }
+        }
+
+        submitBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', nextQuestion);
+
+        // Load first question
+        loadQuestion();
+    </script>
+</body>
+</html>
